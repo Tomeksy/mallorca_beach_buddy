@@ -3,349 +3,484 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beach Buddy - Mallorca's Beach Guide</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Beach Buddy - Your Personal Mallorca Beach Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --accent: #0ea5e9;
+            --background: #f8fafc;
+            --foreground: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            max-height: 800px;
+            background: var(--foreground);
+            border-radius: 24px;
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            animation: container-appear 0.6s ease-out;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f1f5f9;
+            padding: 2rem;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--foreground);
+        }
+
+        .chat-header {
+            padding: 1.5rem 2rem;
+            background: var(--foreground);
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .header-text h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .header-text p {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            animation: message-appear 0.3s ease-out;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message-content {
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .user .message-content {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot .message-content {
+            background: #f1f5f9;
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-container {
+            padding: 1.5rem 2rem;
+            background: var(--foreground);
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+        }
+
+        #messageInput {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 0.9375rem;
+            padding: 0.25rem 0.5rem;
+            outline: none;
+            color: var(--text);
+        }
+
+        #messageInput::placeholder {
+            color: var(--text-light);
+        }
+
+        #sendButton {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+
+        #sendButton:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            background: #f1f5f9;
+            border-radius: 16px;
+            max-width: fit-content;
+            color: var(--text-light);
+            font-size: 0.9375rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-light);
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .dot:nth-child(1) { animation: typing 1.4s infinite; }
+        .dot:nth-child(2) { animation: typing 1.4s infinite 0.2s; }
+        .dot:nth-child(3) { animation: typing 1.4s infinite 0.4s; }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .beach-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .features-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9375rem;
+            color: var(--text);
+        }
+
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            border: 1px solid #e2e8f0;
+        }
+
+        @keyframes container-appear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes message-appear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .chat-container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-</body>
-</html>
-
-// File: src/index.js
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import './index.css';
-
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-
-// File: src/index.css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body {
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(135deg, #1a1c23 0%, #242730 100%);
-    min-height: 100vh;
-}
-
-.message-enter {
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-.message-enter-active {
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 300ms, transform 300ms;
-}
-
-.typing-dot {
-    animation: typing 1.4s infinite;
-    opacity: 0.7;
-}
-
-.typing-dot:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.typing-dot:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes typing {
-    0%, 100% {
-        opacity: 0.7;
-        transform: translateY(0);
-    }
-    50% {
-        opacity: 0.3;
-        transform: translateY(-2px);
-    }
-}
-
-// File: src/App.js
-import React, { useState, useRef, useEffect } from 'react';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { MessageCircle, Send, MapPin, Sun, Waves, Wind } from 'lucide-react';
-import Message from './components/Message';
-import TypingIndicator from './components/TypingIndicator';
-import BeachCard from './components/BeachCard';
-
-const WEBHOOK_URL = 'YOUR_WEBHOOK_URL';
-
-function App() {
-    const [messages, setMessages] = useState([]);
-    const [inputValue, setInputValue] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef(null);
-    
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    useEffect(() => {
-        // Add welcome message with slight delay
-        setTimeout(() => {
-            setMessages([{
-                id: Date.now(),
-                text: "¡Hola! I'm your Beach Buddy for Mallorca. 🏖️ Ask me about any beach, and I'll help you discover your perfect spot! Try asking about popular beaches like Cala Mesquida or specify what you're looking for (quiet, family-friendly, etc).",
-                isUser: false
-            }]);
-        }, 500);
-    }, []);
-
-    const sendMessage = async (e) => {
-        e.preventDefault();
-        if (!inputValue.trim()) return;
-
-        const userMessage = {
-            id: Date.now(),
-            text: inputValue,
-            isUser: true
-        };
-
-        setMessages(prev => [...prev, userMessage]);
-        setInputValue('');
-        setIsLoading(true);
-
-        try {
-            const response = await fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: inputValue })
-            });
-
-            if (!response.ok) throw new Error('Network error');
-
-            const data = await response.text();
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h2 class="sidebar-title">Beach Statistics</h2>
+                <div class="beach-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">180+</div>
+                        <div class="stat-label">Beaches</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">15+</div>
+                        <div class="stat-label">Areas</div>
+                    </div>
+                </div>
+            </div>
             
-            setMessages(prev => [...prev, {
-                id: Date.now(),
-                text: data,
-                isUser: false
-            }]);
-        } catch (error) {
-            setMessages(prev => [...prev, {
-                id: Date.now(),
-                text: "Lo siento! I had trouble processing your message. Please try again.",
-                isUser: false,
-                isError: true
-            }]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-                    <div className="flex items-center space-x-2">
-                        <MessageCircle className="text-white" size={24} />
-                        <h1 className="text-xl font-semibold text-white">Beach Buddy</h1>
-                    </div>
-                    <p className="text-blue-100 text-sm mt-1">Your Mallorca Beach Guide</p>
+            <div class="sidebar-section">
+                <h2 class="sidebar-title">Features</h2>
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        Real-time Locations
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-water"></i>
+                        </div>
+                        Beach Conditions
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-umbrella-beach"></i>
+                        </div>
+                        Facilities Info
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        Directions & Access
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="main-chat">
+            <div class="chat-header">
+                <div class="logo">
+                    <i class="fas fa-umbrella-beach"></i>
                 </div>
-
-                {/* Messages Area */}
-                <div className="h-[60vh] overflow-y-auto p-4 bg-gray-50">
-                    <TransitionGroup>
-                        {messages.map(message => (
-                            <CSSTransition
-                                key={message.id}
-                                timeout={300}
-                                classNames="message"
-                            >
-                                <Message message={message} />
-                            </CSSTransition>
-                        ))}
-                    </TransitionGroup>
-                    {isLoading && <TypingIndicator />}
-                    <div ref={messagesEndRef} />
+                <div class="header-text">
+                    <h1>Beach Buddy</h1>
+                    <p>Your Personal Mallorca Beach Guide</p>
                 </div>
+            </div>
 
-                {/* Input Area */}
-                <form onSubmit={sendMessage} className="p-4 border-t border-gray-200 bg-white">
-                    <div className="flex space-x-2">
-                        <input
-                            type="text"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            placeholder="Ask about beaches in Mallorca..."
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                            disabled={isLoading}
-                        />
-                        <button
-                            type="submit"
-                            disabled={!inputValue.trim() || isLoading}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                        >
-                            <Send size={20} />
-                        </button>
-                    </div>
+            <div class="messages-container" id="messages">
+                <!-- Messages will appear here -->
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                Beach Buddy is typing...
+            </div>
+
+            <div class="input-container">
+                <form id="chatForm" class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="messageInput"
+                        placeholder="Ask about beaches in Mallorca..."
+                        autocomplete="off"
+                    >
+                    <button type="submit" id="sendButton" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </form>
             </div>
         </div>
-    );
-}
+    </div>
 
-export default App;
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const chatForm = document.getElementById('chatForm');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        // Replace with your webhook URL
+        const WEBHOOK_URL = 'YOUR_WEBHOOK_URL';
 
-// File: src/components/Message.js
-import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            messageDiv.innerHTML = `
+                <div class="message-content">${text}</div>
+            `;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
 
-function Message({ message }) {
-    const { text, isUser, isError } = message;
-    
-    return (
-        <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-            <div
-                className={`
-                    max-w-[80%] p-3 rounded-lg
-                    ${isUser 
-                        ? 'bg-blue-500 text-white rounded-br-sm' 
-                        : 'bg-white border border-gray-200 rounded-bl-sm'
-                    }
-                    ${isError ? 'bg-red-50 border-red-100 text-red-600' : ''}
-                `}
-            >
-                {isError && (
-                    <div className="flex items-center space-x-2 mb-2">
-                        <AlertTriangle size={16} className="text-red-500" />
-                        <span className="text-sm font-medium text-red-500">Error</span>
-                    </div>
-                )}
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{text}</p>
-            </div>
-        </div>
-    );
-}
+        messageInput.addEventListener('input', () => {
+            sendButton.disabled = !messageInput.value.trim();
+        });
 
-export default Message;
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
 
-// File: src/components/TypingIndicator.js
-import React from 'react';
+            // Add user message
+            addMessage(message, true);
+            messageInput.value = '';
+            messageInput.disabled = true;
+            sendButton.disabled = true;
 
-function TypingIndicator() {
-    return (
-        <div className="flex items-center space-x-2 mb-4">
-            <div className="bg-white border border-gray-200 rounded-lg p-3">
-                <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-                </div>
-            </div>
-        </div>
-    );
-}
+            // Show typing indicator
+            typingIndicator.style.display = 'flex';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-export default TypingIndicator;
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
 
-// File: src/components/BeachCard.js
-import React from 'react';
-import { MapPin, Sun, Waves, Wind } from 'lucide-react';
+                if (!response.ok) throw new Error('Network error');
 
-function BeachCard({ beach }) {
-    const { name, location, conditions, facilities } = beach;
-    
-    return (
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{name}</h3>
-            
-            <div className="flex items-center text-gray-600 mb-2">
-                <MapPin size={16} className="mr-1" />
-                <span className="text-sm">{location}</span>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-2 mb-3">
-                <div className="flex items-center text-sm text-gray-600">
-                    <Sun size={14} className="mr-1" />
-                    <span>{conditions.sun}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                    <Waves size={14} className="mr-1" />
-                    <span>{conditions.waves}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                    <Wind size={14} className="mr-1" />
-                    <span>{conditions.wind}</span>
-                </div>
-            </div>
-            
-            <div className="text-sm text-gray-600">
-                <strong>Facilities:</strong> {facilities.join(', ')}
-            </div>
-        </div>
-    );
-}
+                const data = await response.text();
+                typingIndicator.style.display = 'none';
+                addMessage(data, false);
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                addMessage('Lo siento! I had trouble processing your message. Please try again.', false);
+            } finally {
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        });
 
-export default BeachCard;
-
-// File: .gitignore
-node_modules
-build
-.env
-.env.local
-.DS_Store
-
-// File: package.json
-{
-  "name": "beach-buddy-chat",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-transition-group": "^4.4.5",
-    "lucide-react": "^0.263.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "gh-pages": "^5.0.0",
-    "react-scripts": "5.0.1"
-  }
-}
+        // Add welcome message with delay for smooth animation
+        setTimeout(() => {
+            addMessage("¡Hola! I'm your Beach Buddy for Mallorca. 🏖️\n\nI can help you discover the perfect beach based on your preferences. Ask me about:\n\n• Popular beaches like Cala Mesquida\n• Family-friendly spots\n• Hidden gems and secluded coves\n• Beaches with specific facilities\n\nWhat kind of beach experience are you looking for?", false);
+        }, 500);
+    </script>
+</body>
+</html>
