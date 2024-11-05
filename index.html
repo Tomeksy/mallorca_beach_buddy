@@ -314,17 +314,70 @@
             50% { transform: translateY(-4px); }
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-            
-            .chat-container {
-                height: 100vh;
-                max-height: none;
-                border-radius: 0;
-            }
-        }
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+    
+    .chat-container {
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+        width: 100%;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .chat-header {
+        padding: 1rem;
+        position: sticky;
+        top: 0;
+        background: var(--foreground);
+        z-index: 10;
+    }
+
+    .messages-container {
+        padding: 1rem;
+        padding-bottom: 80px; /* Space for input */
+    }
+
+    .input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1rem;
+        background: var(--foreground);
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+    .message-content {
+        padding: 0.875rem 1rem;
+        font-size: 0.9375rem;
+    }
+
+    #messageInput {
+        padding: 0.75rem;
+    }
+
+    #sendButton {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* Fix for iOS height issues */
+@supports (-webkit-touch-callout: none) {
+    .chat-container {
+        height: -webkit-fill-available;
+    }
+}
     </style>
 </head>
 <body>
