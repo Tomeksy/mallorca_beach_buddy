@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Buddy - Mallorca's Beach Guide</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
+
+// File: src/index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import './index.css';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+// File: src/index.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #1a1c23 0%, #242730 100%);
+    min-height: 100vh;
+}
+
+.message-enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.message-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+}
+
+.typing-dot {
+    animation: typing 1.4s infinite;
+    opacity: 0.7;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 100% {
+        opacity: 0.7;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 0.3;
+        transform: translateY(-2px);
+    }
+}
+
+// File: src/App.js
+import React, { useState, useRef, useEffect } from 'react';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { MessageCircle, Send, MapPin, Sun, Waves, Wind } from 'lucide-react';
+import Message from './components/Message';
+import TypingIndicator from './components/TypingIndicator';
+import BeachCard from './components/BeachCard';
+
+const WEBHOOK_URL = 'YOUR_WEBHOOK_URL';
+
+function App() {
+    const [messages, setMessages] = useState([]);
+    const [inputValue, setInputValue] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = useRef(null);
+    
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    useEffect(() => {
+        // Add welcome message with slight delay
+        setTimeout(() => {
+            setMessages([{
+                id: Date.now(),
+                text: "¡Hola! I'm your Beach Buddy for Mallorca. 🏖️ Ask me about any beach, and I'll help you discover your perfect spot! Try asking about popular beaches like Cala Mesquida or specify what you're looking for (quiet, family-friendly, etc).",
+                isUser: false
+            }]);
+        }, 500);
+    }, []);
+
+    const sendMessage = async (e) => {
+        e.preventDefault();
+        if (!inputValue.trim()) return;
+
+        const userMessage = {
+            id: Date.now(),
+            text: inputValue,
+            isUser: true
+        };
+
+        setMessages(prev => [...prev, userMessage]);
+        setInputValue('');
+        setIsLoading(true);
+
+        try {
+            const response = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: inputValue })
+            });
+
+            if (!response.ok) throw new Error('Network error');
+
+            const data = await response.text();
+            
+            setMessages(prev => [...prev, {
+                id: Date.now(),
+                text: data,
+                isUser: false
+            }]);
+        } catch (error) {
+            setMessages(prev => [...prev, {
+                id: Date.now(),
+                text: "Lo siento! I had trouble processing your message. Please try again.",
+                isUser: false,
+                isError: true
+            }]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
+                    <div className="flex items-center space-x-2">
+                        <MessageCircle className="text-white" size={24} />
+                        <h1 className="text-xl font-semibold text-white">Beach Buddy</h1>
+                    </div>
+                    <p className="text-blue-100 text-sm mt-1">Your Mallorca Beach Guide</p>
+                </div>
+
+                {/* Messages Area */}
+                <div className="h-[60vh] overflow-y-auto p-4 bg-gray-50">
+                    <TransitionGroup>
+                        {messages.map(message => (
+                            <CSSTransition
+                                key={message.id}
+                                timeout={300}
+                                classNames="message"
+                            >
+                                <Message message={message} />
+                            </CSSTransition>
+                        ))}
+                    </TransitionGroup>
+                    {isLoading && <TypingIndicator />}
+                    <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input Area */}
+                <form onSubmit={sendMessage} className="p-4 border-t border-gray-200 bg-white">
+                    <div className="flex space-x-2">
+                        <input
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            placeholder="Ask about beaches in Mallorca..."
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                            disabled={isLoading}
+                        />
+                        <button
+                            type="submit"
+                            disabled={!inputValue.trim() || isLoading}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                        >
+                            <Send size={20} />
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+export default App;
+
+// File: src/components/Message.js
+import React from 'react';
+import { AlertTriangle } from 'lucide-react';
+
+function Message({ message }) {
+    const { text, isUser, isError } = message;
+    
+    return (
+        <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+            <div
+                className={`
+                    max-w-[80%] p-3 rounded-lg
+                    ${isUser 
+                        ? 'bg-blue-500 text-white rounded-br-sm' 
+                        : 'bg-white border border-gray-200 rounded-bl-sm'
+                    }
+                    ${isError ? 'bg-red-50 border-red-100 text-red-600' : ''}
+                `}
+            >
+                {isError && (
+                    <div className="flex items-center space-x-2 mb-2">
+                        <AlertTriangle size={16} className="text-red-500" />
+                        <span className="text-sm font-medium text-red-500">Error</span>
+                    </div>
+                )}
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{text}</p>
+            </div>
+        </div>
+    );
+}
+
+export default Message;
+
+// File: src/components/TypingIndicator.js
+import React from 'react';
+
+function TypingIndicator() {
+    return (
+        <div className="flex items-center space-x-2 mb-4">
+            <div className="bg-white border border-gray-200 rounded-lg p-3">
+                <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default TypingIndicator;
+
+// File: src/components/BeachCard.js
+import React from 'react';
+import { MapPin, Sun, Waves, Wind } from 'lucide-react';
+
+function BeachCard({ beach }) {
+    const { name, location, conditions, facilities } = beach;
+    
+    return (
+        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">{name}</h3>
+            
+            <div className="flex items-center text-gray-600 mb-2">
+                <MapPin size={16} className="mr-1" />
+                <span className="text-sm">{location}</span>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className="flex items-center text-sm text-gray-600">
+                    <Sun size={14} className="mr-1" />
+                    <span>{conditions.sun}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                    <Waves size={14} className="mr-1" />
+                    <span>{conditions.waves}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                    <Wind size={14} className="mr-1" />
+                    <span>{conditions.wind}</span>
+                </div>
+            </div>
+            
+            <div className="text-sm text-gray-600">
+                <strong>Facilities:</strong> {facilities.join(', ')}
+            </div>
+        </div>
+    );
+}
+
+export default BeachCard;
+
+// File: .gitignore
+node_modules
+build
+.env
+.env.local
+.DS_Store
+
+// File: package.json
+{
+  "name": "beach-buddy-chat",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-transition-group": "^4.4.5",
+    "lucide-react": "^0.263.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "gh-pages": "^5.0.0",
+    "react-scripts": "5.0.1"
+  }
+}
