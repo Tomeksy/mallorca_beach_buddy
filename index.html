@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beach Buddy - Your Personal Mallorca Beach Guide</title>
+    <title>Beach Buddy - Jegliche Strand-Info auf Abruf</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -384,15 +384,15 @@
     <div class="chat-container">
         <div class="sidebar">
             <div class="sidebar-section">
-                <h2 class="sidebar-title">Beach Statistics</h2>
+                <h2 class="sidebar-title">Strand Statistiken</h2>
                 <div class="beach-stats">
                     <div class="stat-card">
                         <div class="stat-value">180+</div>
-                        <div class="stat-label">Beaches</div>
+                        <div class="stat-label">Strände</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">15+</div>
-                        <div class="stat-label">Areas</div>
+                        <div class="stat-label">Orte</div>
                     </div>
                 </div>
             </div>
@@ -404,25 +404,25 @@
                         <div class="feature-icon">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
-                        Real-time Locations
+                        Echtzeit Locations
                     </li>
                     <li class="feature-item">
                         <div class="feature-icon">
                             <i class="fas fa-water"></i>
                         </div>
-                        Beach Conditions
+                        Strand Conditions
                     </li>
                     <li class="feature-item">
                         <div class="feature-icon">
                             <i class="fas fa-umbrella-beach"></i>
                         </div>
-                        Facilities Info
+                        Annehmlichkeiten
                     </li>
                     <li class="feature-item">
                         <div class="feature-icon">
                             <i class="fas fa-route"></i>
                         </div>
-                        Directions & Access
+                        Zugang & Parken
                     </li>
                 </ul>
             </div>
@@ -435,7 +435,7 @@
                 </div>
                 <div class="header-text">
                     <h1>Beach Buddy</h1>
-                    <p>Your Personal Mallorca Beach Guide</p>
+                    <p>Jegliche Strand-Info auf Abruf</p>
                 </div>
             </div>
 
@@ -449,7 +449,7 @@
                     <div class="dot"></div>
                     <div class="dot"></div>
                 </div>
-                Beach Buddy is typing...
+                Beach Buddy schreibt...
             </div>
 
             <div class="input-container">
@@ -475,8 +475,7 @@
         const sendButton = document.getElementById('sendButton');
         const typingIndicator = document.getElementById('typingIndicator');
         
-        // Replace with your webhook URL
-        const WEBHOOK_URL = 'YOUR_WEBHOOK_URL';
+        const WEBHOOK_URL = 'https://hook.eu2.make.com/5prfn1o0va7gejmo6gscrsf58kmetl24';
 
         function addMessage(text, isUser) {
             const messageDiv = document.createElement('div');
@@ -532,7 +531,7 @@
 
         // Add welcome message with delay for smooth animation
         setTimeout(() => {
-            addMessage("¡Hola! I'm your Beach Buddy for Mallorca. 🏖️\n\nI can help you discover the perfect beach based on your preferences. Ask me about:\n\n• Popular beaches like Cala Mesquida\n• Family-friendly spots\n• Hidden gems and secluded coves\n• Beaches with specific facilities\n\nWhat kind of beach experience are you looking for?", false);
+            addMessage("¡Hola!ich bin der Mallorca. 🏖️\n\nIch kann dir Auskunft zu jedem Strand auf Mallorca geben, sag sag mir einfach worauf du Lust hast 🙂", false);
         }, 500);
     </script>
 </body>
