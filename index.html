@@ -468,71 +468,87 @@
         </div>
     </div>
 
-    <script>
-        const messagesDiv = document.getElementById('messages');
-        const chatForm = document.getElementById('chatForm');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const typingIndicator = document.getElementById('typingIndicator');
+<script>
+    const messagesDiv = document.getElementById('messages');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const typingIndicator = document.getElementById('typingIndicator');
+    
+    const WEBHOOK_URL = 'https://hook.eu2.make.com/5prfn1o0va7gejmo6gscrsf58kmetl24';
+
+    // Store message history
+    let messageHistory = [];
+
+    function addMessage(text, isUser) {
+        const messageObj = {
+            id: Date.now(),
+            text: text,
+            role: isUser ? 'user' : 'assistant',
+            timestamp: new Date().toISOString()
+        };
         
-        const WEBHOOK_URL = 'https://hook.eu2.make.com/5prfn1o0va7gejmo6gscrsf58kmetl24';
+        // Add to history
+        messageHistory.push(messageObj);
 
-        function addMessage(text, isUser) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-            messageDiv.innerHTML = `
-                <div class="message-content">${text}</div>
-            `;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        messageDiv.innerHTML = `
+            <div class="message-content">${text}</div>
+        `;
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    messageInput.addEventListener('input', () => {
+        sendButton.disabled = !messageInput.value.trim();
+    });
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        // Add user message
+        addMessage(message, true);
+        messageInput.value = '';
+        messageInput.disabled = true;
+        sendButton.disabled = true;
+
+        // Show typing indicator
+        typingIndicator.style.display = 'flex';
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        try {
+            const response = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    messageHistory: messageHistory
+                })
+            });
+
+            if (!response.ok) throw new Error('Network error');
+
+            const data = await response.text();
+            typingIndicator.style.display = 'none';
+            addMessage(data, false);
+        } catch (error) {
+            typingIndicator.style.display = 'none';
+            addMessage('Entschuldigung! Es gab ein Problem bei der Verarbeitung deiner Nachricht. Bitte versuche es erneut.', false);
+        } finally {
+            messageInput.disabled = false;
+            messageInput.focus();
         }
+    });
 
-        messageInput.addEventListener('input', () => {
-            sendButton.disabled = !messageInput.value.trim();
-        });
-
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const message = messageInput.value.trim();
-            if (!message) return;
-
-            // Add user message
-            addMessage(message, true);
-            messageInput.value = '';
-            messageInput.disabled = true;
-            sendButton.disabled = true;
-
-            // Show typing indicator
-            typingIndicator.style.display = 'flex';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message })
-                });
-
-                if (!response.ok) throw new Error('Network error');
-
-                const data = await response.text();
-                typingIndicator.style.display = 'none';
-                addMessage(data, false);
-            } catch (error) {
-                typingIndicator.style.display = 'none';
-                addMessage('Lo siento! I had trouble processing your message. Please try again.', false);
-            } finally {
-                messageInput.disabled = false;
-                messageInput.focus();
-            }
-        });
-
-        // Add welcome message with delay for smooth animation
-        setTimeout(() => {
-            addMessage("¡Hola! ich bin der Mallorca. 🏖️\n\nIch kann dir Auskunft zu jedem Strand auf Mallorca geben, sag sag mir einfach worauf du Lust hast 🙂", false);
-        }, 500);
-    </script>
+    // Add welcome message with delay for smooth animation
+    setTimeout(() => {
+        addMessage("¡Hola! ich bin der Mallorca. 🏖️\n\nIch kann dir Auskunft zu jedem Strand auf Mallorca geben, sag sag mir einfach worauf du Lust hast 🙂", false);
+    }, 500);
+</script>
 </body>
 </html>
